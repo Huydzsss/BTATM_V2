@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Nạp tiền</title>
+</head>
+<body>
+<h2>Form Nạp Tiền</h2>
+<form action="/transactions/deposit" method="post">
+  <input type="hidden" name="accountId" th:value="${accountId}">
+  <label>Số tiền:</label>
+  <input type="number" name="amount" required>
+  <button type="submit">Nạp tiền</button>
+</form>
+</body>
+</html>
