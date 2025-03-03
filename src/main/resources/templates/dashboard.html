@@ -19,12 +19,11 @@
 <div class="container mt-4">
     <p>Chào mừng, <span th:if="${user != null}" th:text="${user.fullName}">Nguyễn Văn A</span></p>
     <p>Số dư hiện tại:
-        <strong th:if="${user != null and user.accounts != null and user.accounts.size() > 0}"
+        <strong th:if="${user != null and user.accounts != null and not #lists.isEmpty(user.accounts)}"
                 th:text="${user.accounts[0].balance} + ' VND'">
         </strong>
-        <strong th:unless="${user != null and user.accounts != null and user.accounts.size() > 0}">0 VND</strong>
+        <strong th:unless="${user != null and user.accounts != null and not #lists.isEmpty(user.accounts)}">0 VND</strong>
     </p>
-
 
     <div class="row">
         <div class="col-md-4">
@@ -36,7 +35,6 @@
         <div class="col-md-4">
             <a href="/transactions" class="btn btn-warning w-100">Lịch sử giao dịch</a>
         </div>
-
     </div>
 </div>
 
@@ -50,7 +48,7 @@
             </div>
             <div class="modal-body">
                 <form th:action="@{/transactions/deposit}" method="post">
-                    <input type="hidden" name="accountId" th:value="${user.accounts[0].id}">
+                    <input type="hidden" name="accountId" th:if="${not #lists.isEmpty(user.accounts)}" th:value="${user.accounts[0].id}">
                     <label for="depositAmount">Số tiền:</label>
                     <input type="number" name="amount" id="depositAmount" class="form-control" required>
                     <button type="submit" class="btn btn-success mt-3">Xác nhận</button>
@@ -70,7 +68,7 @@
             </div>
             <div class="modal-body">
                 <form th:action="@{/transactions/withdraw}" method="post">
-                    <input type="hidden" name="accountId" th:value="${user.accounts[0].id}">
+                    <input type="hidden" name="accountId" th:if="${not #lists.isEmpty(user.accounts)}" th:value="${user.accounts[0].id}">
                     <label for="withdrawAmount">Số tiền:</label>
                     <input type="number" name="amount" id="withdrawAmount" class="form-control" required>
                     <button type="submit" class="btn btn-danger mt-3">Xác nhận</button>
@@ -79,6 +77,7 @@
         </div>
     </div>
 </div>
+
 <!-- Modal Chuyển Tiền -->
 <div class="modal fade" id="transferModal" tabindex="-1">
     <div class="modal-dialog">
@@ -89,7 +88,7 @@
             </div>
             <div class="modal-body">
                 <form th:action="@{/transactions/transfer}" method="post">
-                    <input type="hidden" name="fromAccountId" th:value="${user.accounts[0].id}">
+                    <input type="hidden" name="fromAccountId" th:if="${not #lists.isEmpty(user.accounts)}" th:value="${user.accounts[0].id}">
 
                     <label for="toAccountNumberModal">Tài khoản đích:</label>
                     <input type="text" class="form-control" id="toAccountNumberModal" name="toAccountNumber" required>
@@ -99,13 +98,10 @@
 
                     <button type="submit" class="btn btn-primary mt-3">Xác nhận</button>
                 </form>
-
             </div>
         </div>
     </div>
 </div>
-
-
 
 <!-- Nút mở modal chuyển tiền -->
 <div class="col-md-4">

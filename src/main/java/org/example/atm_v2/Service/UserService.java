@@ -23,6 +23,7 @@ public class UserService {
         userRepository.save(user);
     }
     public boolean checkPassword(String rawPassword, String encodedPassword) {
-        return rawPassword.equals(encodedPassword); // So sánh trực tiếp
+        return passwordEncoder.matches(rawPassword, encodedPassword);
     }
+
 }
