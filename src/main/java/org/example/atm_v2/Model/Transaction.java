@@ -17,6 +17,7 @@ public class Transaction {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
@@ -30,4 +31,19 @@ public class Transaction {
 
     @Column(nullable = false)
     private LocalDateTime transactionDate = LocalDateTime.now();
+
+    @Column(precision = 5, scale = 2)
+    private BigDecimal interestRate; // Lãi suất
+
+    @Column
+    private Integer months;
+
+    public Transaction(Account account, TransactionType transactionType, BigDecimal amount, BigDecimal interestRate, Integer months) {
+        this.account = account;
+        this.transactionType = transactionType;
+        this.amount = amount;
+        this.interestRate = interestRate;
+        this.months = months;
+        this.transactionDate = LocalDateTime.now();
+    }
 }

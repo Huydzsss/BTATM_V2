@@ -3,8 +3,10 @@ package org.example.atm_v2.Service;
 import org.example.atm_v2.Model.Account;
 import org.example.atm_v2.Model.Transaction;
 import org.example.atm_v2.Model.TransactionType;
+import org.example.atm_v2.Model.User;
 import org.example.atm_v2.Respository.AccountRepository;
 import org.example.atm_v2.Respository.TransactionRepository;
+import org.example.atm_v2.Respository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,8 @@ public class AccountService {
 
     @Autowired
     private TransactionRepository transactionRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     public Optional<Account> getAccountById(Long accountId) {
         return accountRepository.findById(accountId);
@@ -26,6 +30,9 @@ public class AccountService {
 
     public Optional<Account> getAccountByNumber(String accountNumber) {
         return accountRepository.findByAccountNumber(accountNumber);
+    }
+    public Optional<User> getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     @Transactional
@@ -50,5 +57,8 @@ public class AccountService {
         transaction.setTransactionType(TransactionType.TRANSFER_IN);
         transaction.setAmount(amount);
         transactionRepository.save(transaction);
+    }
+    public void saveAccount(Account account) {
+        accountRepository.save(account);
     }
 }

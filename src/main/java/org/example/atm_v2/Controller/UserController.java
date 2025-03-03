@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Optional;
+
 @Controller
 public class UserController {
     @Autowired
@@ -22,16 +24,27 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String handleLogin(@RequestParam String username, @RequestParam String password, HttpSession session) {
-        User user = userService.findByUsername(username);
+    public String handleLogin(@RequestParam String username,
+                              @RequestParam String password,
+                              HttpSession session) {
+        Optional<User> optionalUser = userService.findByUsername(username);
 
-        if (user == null || !userService.checkPassword(password, user.getPassword())) {
+        // Kiểm tra xem user có tồn tại không
+        if (optionalUser.isEmpty()) {
+            return "redirect:/login?error=true";
+        }
+
+        User user = optionalUser.get(); // Lấy user từ Optional
+
+        // Kiểm tra mật khẩu
+        if (!userService.checkPassword(password, user.getPassword())) {
             return "redirect:/login?error=true";
         }
 
         session.setAttribute("user", user);
         return "redirect:/dashboard";
     }
+
 
     @GetMapping("/register")
     public String registerPage() {
@@ -59,13 +72,27 @@ public class UserController {
 
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session, Model model) {
-        User user = (User) session.getAttribute("user");
-        if (user == null) {
+        User sessionUser = (User) session.getAttribute("user");
+
+        if (sessionUser == null) {
             return "redirect:/login";
         }
-        model.addAttribute("user", user);
+
+        // Lấy User từ database để đảm bảo có danh sách accounts
+        Optional<User> optionalUser = userService.findByUsername(sessionUser.getUsername());
+
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            System.out.println("User: " + user);
+            System.out.println("Accounts: " + user.getAccounts());
+            model.addAttribute("user", user);
+        } else {
+            return "redirect:/login";
+        }
+
         return "dashboard";
     }
+
 
     @GetMapping("/logout")
     public String logout(HttpSession session) {

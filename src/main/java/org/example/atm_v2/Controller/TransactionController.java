@@ -92,6 +92,20 @@ public class TransactionController {
             return "error";
         }
     }
+    @PostMapping("/saving")
+    public String createSavingAccount(@RequestParam Long accountId,
+                                      @RequestParam BigDecimal amount,
+                                      @RequestParam BigDecimal interestRate,
+                                      @RequestParam Integer months,
+                                      Model model) {
+        try {
+            transactionService.createSavingTransaction(accountId, amount, interestRate, months);
+        } catch (Exception e) {
+            model.addAttribute("error", "Gửi tiết kiệm thất bại: " + e.getMessage());
+            return "error";
+        }
+        return "redirect:/transactions/" + accountId;
+    }
 
 
 }

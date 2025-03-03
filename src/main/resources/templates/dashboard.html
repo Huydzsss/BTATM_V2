@@ -5,38 +5,80 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ATM - Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/js/TransactionController.js" defer></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .dashboard {
+            max-width: 900px;
+            margin: auto;
+        }
+        .card {
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+        .card:hover {
+            transform: scale(1.02);
+        }
+        .account-info {
+            font-size: 1.2rem;
+        }
+        .btn-action {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
+
 <nav class="navbar navbar-dark bg-primary">
     <div class="container">
-        <a class="navbar-brand" href="#">ATM Banking</a>
-        <a href="/logout" class="btn btn-outline-light">Đăng xuất</a>
+        <a class="navbar-brand" href="#"><i class="fa-solid fa-building-columns"></i> ATM Banking</a>
+        <a href="/logout" class="btn btn-outline-light"><i class="fa-solid fa-sign-out-alt"></i> Đăng xuất</a>
     </div>
 </nav>
 
-<div class="container mt-4">
-    <p>Chào mừng, <span th:if="${user != null}" th:text="${user.fullName}">Nguyễn Văn A</span></p>
-    <p>Số dư hiện tại:
-        <strong th:if="${user != null and user.accounts != null and not #lists.isEmpty(user.accounts)}"
-                th:text="${user.accounts[0].balance} + ' VND'">
-        </strong>
-        <strong th:unless="${user != null and user.accounts != null and not #lists.isEmpty(user.accounts)}">0 VND</strong>
-    </p>
+<div class="dashboard mt-4">
+    <h2 class="text-center text-primary mb-4">Thông Tin Tài Khoản</h2>
 
     <div class="row">
-        <div class="col-md-4">
-            <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#depositModal">Nạp tiền</button>
-        </div>
-        <div class="col-md-4">
-            <button class="btn btn-danger w-100" data-bs-toggle="modal" data-bs-target="#withdrawModal">Rút tiền</button>
-        </div>
-        <div class="col-md-4">
-            <a href="/transactions" class="btn btn-warning w-100">Lịch sử giao dịch</a>
+        <div th:each="account : ${user.accounts}" class="col-md-6">
+            <div class="card shadow-sm p-3 mb-3">
+                <h5 class="text-primary"><i class="fa-solid fa-wallet"></i> Số tài khoản:</h5>
+                <p class="account-info" th:text="${account.accountNumber}"></p>
+                <h5 class="text-success"><i class="fa-solid fa-money-bill-wave"></i> Số dư:</h5>
+                <p class="account-info" th:text="${account.balance} + ' VND'"></p>
+            </div>
         </div>
     </div>
+
+    <p th:if="${user.accounts == null or #lists.isEmpty(user.accounts)}" class="text-center text-danger">Bạn chưa có tài khoản.</p>
+
+    <h3 class="text-center mt-4">Chức năng</h3>
+    <div class="btn-action mt-3">
+        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#depositModal">
+            <i class="fa-solid fa-plus"></i> Nạp tiền
+        </button>
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+            <i class="fa-solid fa-minus"></i> Rút tiền
+        </button>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#transferModal">
+            <i class="fa-solid fa-exchange-alt"></i> Chuyển tiền
+        </button>
+        <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#savingAccountModal">
+            <i class="fa-solid fa-piggy-bank"></i> Gửi tiết kiệm
+        </button>
+        <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#createAccountModal">
+            <i class="fa-solid fa-plus-circle"></i> Tạo tài khoản
+        </button>
+    </div>
 </div>
+
 
 <!-- Modal Nạp Tiền -->
 <div class="modal fade" id="depositModal" tabindex="-1">
@@ -89,13 +131,10 @@
             <div class="modal-body">
                 <form th:action="@{/transactions/transfer}" method="post">
                     <input type="hidden" name="fromAccountId" th:if="${not #lists.isEmpty(user.accounts)}" th:value="${user.accounts[0].id}">
-
                     <label for="toAccountNumberModal">Tài khoản đích:</label>
                     <input type="text" class="form-control" id="toAccountNumberModal" name="toAccountNumber" required>
-
                     <label for="transferAmountModal">Số tiền:</label>
                     <input type="number" class="form-control" id="transferAmountModal" name="amount" required>
-
                     <button type="submit" class="btn btn-primary mt-3">Xác nhận</button>
                 </form>
             </div>
@@ -103,10 +142,56 @@
     </div>
 </div>
 
-<!-- Nút mở modal chuyển tiền -->
-<div class="col-md-4">
-    <button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#transferModal">Chuyển tiền</button>
+<!-- Modal Gửi Tiết Kiệm -->
+<div class="modal fade" id="savingAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Gửi Tiết Kiệm</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/transactions/saving}" method="post">
+                    <input type="hidden" name="accountId" th:if="${not #lists.isEmpty(user.accounts)}" th:value="${user.accounts[0].id}">
+                    <label for="savingAmount">Số tiền gửi:</label>
+                    <input type="number" class="form-control" id="savingAmount" name="amount" required>
+                    <label for="interestRate">Lãi suất (%):</label>
+                    <input type="number" class="form-control" id="interestRate" name="interestRate" step="0.1" required>
+                    <label for="months">Kỳ hạn (tháng):</label>
+                    <input type="number" class="form-control" id="months" name="months" required>
+                    <button type="submit" class="btn btn-info mt-3">Xác nhận</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+<!-- Modal Tạo Tài Khoản Ngân Hàng -->
+<div class="modal fade" id="createAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tạo Tài Khoản Ngân Hàng</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form th:action="@{/accounts/create}" method="post">
+                    <label for="accountType">Loại tài khoản:</label>
+                    <select class="form-control" id="accountType" name="accountType" required>
+                        <option value="SAVINGS">Tiết kiệm</option>
+                        <option value="CHECKING">Thanh toán</option>
+                    </select>
+                    <label for="initialBalance">Số dư ban đầu:</label>
+                    <input type="number" class="form-control" id="initialBalance" name="balance" required>
+                    <button type="submit" class="btn btn-warning mt-3">Tạo tài khoản</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:if="${successMessage}" class="alert alert-success">
+    <span th:text="${successMessage}"></span>
+</div>
+
 
 </body>
 </html>

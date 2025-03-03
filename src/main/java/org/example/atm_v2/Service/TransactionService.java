@@ -85,6 +85,20 @@ public class TransactionService {
         depositTransaction.setTransactionDate(LocalDateTime.now());
         transactionRepository.save(depositTransaction);
     }
+    public void createSavingTransaction(Long accountId, BigDecimal amount, BigDecimal interestRate, Integer months) {
+        Account account = accountRepository.findById(accountId)
+                .orElseThrow(() -> new IllegalArgumentException("Tài khoản không tồn tại"));
+
+        // Logic xử lý gửi tiết kiệm (có thể thêm tính toán lãi suất)
+        Transaction transaction = new Transaction();
+        transaction.setAccount(account);
+        transaction.setAmount(amount);
+        transaction.setTransactionType(TransactionType.SAVING);
+        transaction.setInterestRate(interestRate);
+        transaction.setMonths(months);
+
+        transactionRepository.save(transaction);
+    }
 
 }
 
